@@ -22,17 +22,27 @@ from cd4ml.model_validation import push_model
 from cd4ml.data_processing.track_data import track_data
 from cd4ml.configs.configuration import load_config
 
+# ---------------------------------------------------------------------------
 
 ### SET A UNIQUE MODEL NAME (e.g. "model_<YOUR NAME>"):
 _model_name = "my_model"
 ### SET A UNIQUE EXPERIMENT NAME (e.g. "experiment_<YOUR NAME>"):
 _mlflow_experiment_name = "my_experiment"
 
+### SET CONFIG FILE NAME
+_conf_file = "config.yaml"
+
+### SET RAW DATA DIRECTORY
 _raw_data_dir = '/data/batch1'
 # _raw_data_dir = '/data/batch2'
 
+# ---------------------------------------------------------------------------
+
 
 _root_dir = "/"
+_current_working_dir = os.getcwd()
+_plugin_dir = os.path.join(_current_working_dir, 'plugins', 'cd4ml')
+_conf_path = os.path.join(_plugin_dir, 'configs', 'conf_files', _conf_file)
 _data_dir = "/data"
 _data_files = {
     'raw_data_file': os.path.join(_data_dir, 'data.csv'),
@@ -43,7 +53,6 @@ _data_files = {
     'transformed_x_test_file': os.path.join(_data_dir, 'x_test.csv'),
     'transformed_y_test_file': os.path.join(_data_dir, 'y_test.csv'),
 }
-
 
 if not _root_dir:
     raise ValueError('PROJECT_PATH environment variable not set')
@@ -70,7 +79,7 @@ with dag:
     load_config = PythonOperator(
         task_id='load_config',
         python_callable=load_config,
-        op_kwargs={}
+        op_kwargs={'conf_path': _conf_path}
     )
 
     data_ingestion = PythonOperator(

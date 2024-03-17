@@ -14,7 +14,7 @@ The purpose of this repository is twofold:
 - **DVC**: For data version control.
 - **MLflow**: For experiment tracking and model registry.
 - **Apache Airflow**: For orchestrating the ML pipeline.
-- **Hydra**: For managing configuration.
+- **OmegaConf**: For managing configuration.
 - **Optuna**: For hyperparameter optimization.
 - **Docker**: For containerization and isolation of the environment.
 - **MinIO**: For S3-compatible storage.

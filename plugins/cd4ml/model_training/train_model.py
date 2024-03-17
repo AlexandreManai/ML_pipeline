@@ -23,11 +23,12 @@ def _check_keys(dict_, required_keys):
             raise ValueError(f'input argument "data_files" is missing required key "{key}"')
 
 
-def get_model():
+def get_model(conf):
     """define and return the multi-classication model"""
     # DEFINE YOUR IMPROVED MODEL HERE:
-    C = 1.0
-    iterations = 50
+
+    C = conf.get('C', 1.0)
+    iterations = conf.get('iterations', 1000)
     model = LogisticRegression(C=C, max_iter=iterations)
     return model
     
@@ -48,6 +49,11 @@ def train_model(data_files, experiment_name="experiment", **kwargs):
         'transformed_y_train_file',
     ]
     _check_keys(data_files, required_keys)
+
+    # Get configuration
+    task_instance = kwargs.get('task_instance')
+    conf = task_instance.xcom_pull(task_ids='load_config')['model_training']
+    logger.info(f"Configuration: {conf}")
     
     start = time.time()
         
@@ -63,7 +69,7 @@ def train_model(data_files, experiment_name="experiment", **kwargs):
         git_hash = os.popen("git rev-parse --verify HEAD").read()[:-2]
         mlflow.set_tag("git_hash", git_hash)
         
-        clf = get_model()
+        clf = get_model(conf)
         clf.fit(x_train, y_train)
     
         # return the model uri
