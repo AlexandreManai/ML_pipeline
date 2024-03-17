@@ -20,6 +20,8 @@ from cd4ml.model_training import train_model
 from cd4ml.model_validation import validate_model
 from cd4ml.model_validation import push_model
 from cd4ml.data_processing.track_data import track_data
+from cd4ml.configs.configuration import load_config
+
 
 ### SET A UNIQUE MODEL NAME (e.g. "model_<YOUR NAME>"):
 _model_name = "my_model"
@@ -64,6 +66,13 @@ dag = DAG(
 
 with dag:
     pass
+
+    load_config = PythonOperator(
+        task_id='load_config',
+        python_callable=load_config,
+        op_kwargs={}
+    )
+
     data_ingestion = PythonOperator(
         task_id='data_ingestion',
         python_callable=ingest_data,
@@ -123,7 +132,8 @@ with dag:
         },
     )
 
-    data_ingestion >> data_split >> data_validation >> data_transformation >> model_training >> model_validation >> [
+    load_config >> data_ingestion >> data_split >> data_validation >> data_transformation >> model_training >> model_validation >> [
         push_to_production, stop]
+
     data_split >> data_validation >> data_transformation >> model_validation >> [
         push_to_production, stop]

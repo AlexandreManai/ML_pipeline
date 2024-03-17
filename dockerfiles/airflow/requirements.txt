@@ -2,3 +2,5 @@ tqdm
 mlflow
 dvc
 scikit-learn
+hydra-core --upgrade
+omegaconf
