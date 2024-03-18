@@ -1,7 +1,7 @@
 
 # 🚀 Machine Learning Pipeline
 
-Welcome to the Machine Learning Pipeline repository! This project encompasses a complete MLOps training pipeline using open-source technologies, aimed at providing a robust foundation for machine learning workflows. This tool is designed to assist in both educational and production-level ML projects.
+Welcome to the Machine Learning Pipeline repository! This project encompasses a complete MLOps training pipeline using open-source technologies, aimed at providing a robust foundation for machine learning workflows. This tool is designed to assist in both educational and production-level ML projects
 
 ## Overview 🎯
 
