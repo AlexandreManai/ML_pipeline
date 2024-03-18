@@ -1,0 +1,1 @@
+from cd4ml.hyperparameter_optimization.optimize import run_trial

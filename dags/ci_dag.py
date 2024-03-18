@@ -21,6 +21,7 @@ from cd4ml.model_validation import validate_model
 from cd4ml.model_validation import push_model
 from cd4ml.data_processing.track_data import track_data
 from cd4ml.configs.configuration import load_config
+from cd4ml.hyperparameter_optimization.optimize import run_trial
 
 # ---------------------------------------------------------------------------
 
@@ -109,6 +110,14 @@ with dag:
         op_kwargs={'data_files': _data_files}
     )
 
+    hyperparameter_optimization = PythonOperator(
+        task_id='hyperparameter_optimization',
+        python_callable=run_trial,
+        op_kwargs={
+            'data_files': _data_files
+        }
+    )
+
     model_training = PythonOperator(
         task_id='model_training',
         python_callable=train_model,
@@ -141,7 +150,7 @@ with dag:
         },
     )
 
-    load_config >> data_ingestion >> data_split >> data_validation >> data_transformation >> model_training >> model_validation >> [
+    load_config >> data_ingestion >> data_split >> data_validation >> data_transformation >> hyperparameter_optimization >> model_training >> model_validation >> [
         push_to_production, stop]
 
     data_split >> data_validation >> data_transformation >> model_validation >> [
