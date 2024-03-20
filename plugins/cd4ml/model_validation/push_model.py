@@ -1,8 +1,3 @@
-# Author:      CD4ML Working Group @ D ONE
-# Description: Use this script to push the model of the current pipeline run to
-#              the MLflow server and lael it as 'production'
-# ================================================================================
-
 import mlflow
 from mlflow.tracking.client import MlflowClient
 import logging

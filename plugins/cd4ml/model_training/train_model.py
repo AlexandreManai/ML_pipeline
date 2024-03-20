@@ -1,10 +1,3 @@
-# Author:      CD4ML Working Group @ D ONE
-# Description: Use this script to train a new ML model from scratch. The algorithm
-#              is defined in 'get_model'. The trained model will be tracked in
-#              MLflow and is available for further steps in the pipeline via model 
-#              uri
-# ================================================================================
-
 import os
 import mlflow
 import time
@@ -50,9 +43,15 @@ def train_model(data_files, experiment_name="experiment", **kwargs):
     ]
     _check_keys(data_files, required_keys)
 
-    # Get configuration
+    # Get configuration from config file or optuna optimization
     task_instance = kwargs.get('task_instance')
     conf = task_instance.xcom_pull(task_ids='load_config')['model_training']
+
+    # logger.info(f"Configuration: {conf}")
+
+    if conf["optuna"]:
+        conf = task_instance.xcom_pull(task_ids='hyperparameter_optimization')
+
     logger.info(f"Configuration: {conf}")
     
     start = time.time()

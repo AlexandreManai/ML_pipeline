@@ -1,8 +1,3 @@
-# Author:      CD4ML Working Group @ D ONE
-# Description: Use this script to split the raw input data into a train and
-#              test split
-# ================================================================================
-
 import os
 import pandas as pd
 from datetime import datetime, timedelta

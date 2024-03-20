@@ -17,16 +17,24 @@ def run_trial(data_files, **kwargs):
         x_test = pd.read_csv(data_files['transformed_x_test_file'])
         y_test = pd.read_csv(data_files['transformed_y_test_file'])
 
+        # Get configuration from config file or optuna optimization
+        task_instance = kwargs.get('task_instance')
+        conf = task_instance.xcom_pull(task_ids='load_config')['hyperparameter_optimization']
+
+        trial_params = {}
+        for hp_name, hp_details in conf.items():
+            method = getattr(trial, f'suggest_{hp_details["type"]}')
+            trial_params[hp_name] = method(hp_name, *hp_details["args"])
+
+        logger.info(f"Trial parameters: {trial_params}")
 
         # DEFINE YOUR IMPROVED MODEL HERE:
-        C = trial.suggest_float('C', 0.1, 2)
-        iterations = trial.suggest_int('iterations', 100, 110)
-        model = LogisticRegression(C=C, max_iter=iterations)
+        model = LogisticRegression(**trial_params)
         
         model.fit(x_train, y_train)
         return model.score(x_test, y_test)
     
-    study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study = optuna.create_study(direction=conf.get('direction', 'maximize'))
+    study.optimize(objective, n_trials=conf.get('n_trials', 100))
 
     return study.best_params

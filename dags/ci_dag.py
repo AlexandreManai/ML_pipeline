@@ -31,7 +31,7 @@ _model_name = "my_model"
 _mlflow_experiment_name = "my_experiment"
 
 ### SET CONFIG FILE NAME
-_conf_file = "config.yaml"
+_conf_file = "config"
 
 ### SET RAW DATA DIRECTORY
 _raw_data_dir = '/data/batch1'
@@ -43,7 +43,7 @@ _raw_data_dir = '/data/batch1'
 _root_dir = "/"
 _current_working_dir = os.getcwd()
 _plugin_dir = os.path.join(_current_working_dir, 'plugins', 'cd4ml')
-_conf_path = os.path.join(_plugin_dir, 'configs', 'conf_files', _conf_file)
+_conf_path = os.path.join(_plugin_dir, 'configs', 'conf_files', _conf_file, ".yaml")
 _data_dir = "/data"
 _data_files = {
     'raw_data_file': os.path.join(_data_dir, 'data.csv'),
