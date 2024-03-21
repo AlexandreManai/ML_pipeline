@@ -62,22 +62,27 @@ def train_model(data_files, home_dir, experiment_name="experiment", **kwargs):
     
     x_train = pd.read_csv(data_files['transformed_x_train_file'])
     y_train = pd.read_csv(data_files['transformed_y_train_file'])
+
+    os.chdir(home_dir)
     
     with mlflow.start_run() as active_run:
         run_id = active_run.info.run_id
         # add the git commit hash as tag to the experiment run
         # git_hash = os.popen("git rev-parse --verify HEAD").read()[:-2]
 
-        logger.info(f"home_dir: {home_dir}")
+        logger.info(f"home_dir: {os.listdir()}")
 
         # TODO: Issue on these commands
-        with sp.Popen(["git", "status"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
-            logger.info(f"error: {proc.stderr.read()}")
-            logger.info(f"git status: {proc.stdout.read()}")
+        # with sp.Popen(["git", "status"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
+        #     logger.info(f"error: {proc.stderr.read()}")
+        #     logger.info(f"git status: {proc.stdout.read()}")
         
         with sp.Popen(["git", "rev-parse", "--verify", "HEAD"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
             git_hash = proc.stdout.read().decode("utf-8")[:-1]
             logger.info(f"error: {proc.stderr.read()}")
+
+        os.popen(f"git -C {home_dir} status").read()
+        git_hash = os.popen(f"git -C {home_dir} rev-parse --verify HEAD").read()[:-1]
 
         logger.info(f"git hash: {git_hash}")
         mlflow.set_tag("git_hash", git_hash)

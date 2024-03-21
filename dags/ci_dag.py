@@ -35,7 +35,7 @@ _conf_file = "config"
 
 ### SET RAW DATA DIRECTORY
 # _raw_data_dir = '/data/batch1'
-_raw_data_dir = '/data/batch2'
+_raw_data_dir = '/data/batch1'
 
 # ---------------------------------------------------------------------------
 

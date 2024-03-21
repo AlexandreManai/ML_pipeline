@@ -8,20 +8,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# TODO: Solve the dvc init issue --> probably due to the fact that the dvc init is not in the right directory
 def _initialize_dvc(home_dir, data_dir):
     """initialize .dvc stored in 'home_dir' with data in 'data_dir'"""
     logger.info("initializing DVC repository")
-    
-    with sp.Popen(["git", "init"], cwd=home_dir) as proc:
-        proc.wait()
 
-    with sp.Popen(["dvc", "init"], cwd=home_dir) as proc:
-        proc.wait()
+    logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f"List files {os.listdir()}")
 
-    with sp.Popen(["dvc", "remote", "add", "-d", "dvc_remote", os.path.join(home_dir, "dvc_remote")], cwd=home_dir) as proc:
+    with sp.Popen(["dvc", "init", "--subdir"], stderr=sp.PIPE, cwd=home_dir) as proc:
+        proc.wait()
+        logger.info(proc.stderr.read())
+
+    with sp.Popen(["dvc", "remote", "add", "-d", "dvc_remote", os.path.join(home_dir, "dvc_remote")], cwd="/") as proc:
         proc.wait()
     
-    with sp.Popen(["git", "commit", "-m", "'dvc setup'"], cwd=home_dir) as proc:
+    with sp.Popen(["git", "commit", "-m", "'dvc setup'"], cwd="/") as proc:
         proc.wait()
     
     logger.info("DVC setup committed to Git")
@@ -57,30 +59,21 @@ def track_data(home_dir, data_files, **kwargs):
     
     if not os.popen("dvc status").read() == "Data and pipelines are up to date.\n":
         logger.info("Data update detected")
-        logger.info(os.popen("dvc status").read())
+        # logger.info(os.popen("dvc status").read())
         
-        # TODO: Not fully sure these are working either
         # Track current version of dataset
         current_time = datetime.now()
         timestamp = current_time.strftime("%Y/%m/%d-%H:%M:%S")
 
-        logger.info(f"Current working directory: {os.getcwd()}")
+        # logger.info(f"Current working directory: {os.getcwd()}")
+        # logger.info(f"List files {os.listdir()}")
 
-        with sp.Popen(f"dvc add data.csv", cwd=home_dir) as proc:
-            proc.wait()
-
-        with sp.Popen(f"git add {data_files['raw_data_file']}.dvc", cwd=home_dir) as proc:
-            proc.wait()
-        
-        commit_msg = ' '.join(["adding dataset version", timestamp])
-        with sp.Popen(f"git commit -m '{commit_msg}'", cwd=home_dir) as proc:
-            proc.wait()
-        
-        logger.info(f"Committed new dataset version {timestamp}")
-    
-        with sp.Popen("dvc push", cwd=home_dir) as proc:
-            proc.wait()
+        os.popen(f"dvc add {data_files['raw_data_file']}").read()
+        os.popen(f"git add {data_files['raw_data_file']}.dvc").read()
+        os.popen(f"git commit -m 'adding dataset version {timestamp}'").read()
+        os.popen("dvc push").read()
         logger.info("Pushed data to remote")
+
     else:
         logger.info("Dataset did not change. Nothing to track.")
     
@@ -91,5 +84,5 @@ if __name__ == "__main__":
     parser.add_argument('--data_files', type=dict, help='dict including the key "raw_data_file"')
 
     args = parser.parse_args()
-    track_data(args.home_dir, args.data_dir)
+    track_data(args.home_dir, args.data_files)
     
