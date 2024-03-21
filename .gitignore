@@ -139,7 +139,7 @@ data/*
 !data/batch0
 !data/batch1
 !data/batch2
-!/*.dvc
+!data/*.dvc
 logs/*
 postgres/*
 mlflow-data/*
