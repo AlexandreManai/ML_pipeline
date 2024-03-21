@@ -135,7 +135,7 @@ dmypy.json
 data_config.json
 
 # Docker Volumes
-data/*
+data/*.csv
 !data/batch0
 !data/batch1
 !data/batch2
