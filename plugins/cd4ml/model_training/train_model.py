@@ -4,6 +4,7 @@ import time
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier
+import subprocess as sp
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ def get_model(conf):
     return model
     
 
-def train_model(data_files, experiment_name="experiment", **kwargs):
+def train_model(data_files, home_dir, experiment_name="experiment", **kwargs):
     """
     Loads x_train.csv and y_train.csv from data_dir, trains a model and tracks
     it with MLflow
@@ -65,7 +66,20 @@ def train_model(data_files, experiment_name="experiment", **kwargs):
     with mlflow.start_run() as active_run:
         run_id = active_run.info.run_id
         # add the git commit hash as tag to the experiment run
-        git_hash = os.popen("git rev-parse --verify HEAD").read()[:-2]
+        # git_hash = os.popen("git rev-parse --verify HEAD").read()[:-2]
+
+        logger.info(f"home_dir: {home_dir}")
+
+        # TODO: Issue on these commands
+        with sp.Popen(["git", "status"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
+            logger.info(f"error: {proc.stderr.read()}")
+            logger.info(f"git status: {proc.stdout.read()}")
+        
+        with sp.Popen(["git", "rev-parse", "--verify", "HEAD"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
+            git_hash = proc.stdout.read().decode("utf-8")[:-1]
+            logger.info(f"error: {proc.stderr.read()}")
+
+        logger.info(f"git hash: {git_hash}")
         mlflow.set_tag("git_hash", git_hash)
         
         clf = get_model(conf)

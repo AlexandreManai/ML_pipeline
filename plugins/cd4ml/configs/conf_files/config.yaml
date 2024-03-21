@@ -1,12 +1,13 @@
 hyperparameter_optimization:
   direction: maximize
   n_trials: 100
-  C: 
-    type: float
-    args: [0.1, 0.2]
-  max_iter:
-    type: int
-    args: [100, 101]
+  parameters:
+    C: 
+      type: float
+      args: [0.1, 0.2]
+    max_iter:
+      type: int
+      args: [100, 101]
 model_training:
   optuna: true
   C: 1

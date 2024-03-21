@@ -34,8 +34,8 @@ _mlflow_experiment_name = "my_experiment"
 _conf_file = "config"
 
 ### SET RAW DATA DIRECTORY
-_raw_data_dir = '/data/batch1'
-# _raw_data_dir = '/data/batch2'
+# _raw_data_dir = '/data/batch1'
+_raw_data_dir = '/data/batch2'
 
 # ---------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ _raw_data_dir = '/data/batch1'
 _root_dir = "/"
 _current_working_dir = os.getcwd()
 _plugin_dir = os.path.join(_current_working_dir, 'plugins', 'cd4ml')
-_conf_path = os.path.join(_plugin_dir, 'configs', 'conf_files', _conf_file, ".yaml")
+_conf_path = os.path.join(_plugin_dir, 'configs', 'conf_files', _conf_file + ".yaml")
 _data_dir = "/data"
 _data_files = {
     'raw_data_file': os.path.join(_data_dir, 'data.csv'),
@@ -104,6 +104,13 @@ with dag:
                    'configs_dir': _data_dir}
     )
 
+    track_data = PythonOperator(
+        task_id='track_data',
+        python_callable=track_data,
+        op_kwargs={'home_dir': _data_dir,
+                   'data_files': _data_files}
+    )
+
     data_transformation = PythonOperator(
         task_id='data_transformation',
         python_callable=transform_data,
@@ -123,6 +130,7 @@ with dag:
         python_callable=train_model,
         op_kwargs={
             'data_files': _data_files,
+            'home_dir': _data_dir,
             'experiment_name': _mlflow_experiment_name
         }
     )
@@ -150,7 +158,7 @@ with dag:
         },
     )
 
-    load_config >> data_ingestion >> data_split >> data_validation >> data_transformation >> hyperparameter_optimization >> model_training >> model_validation >> [
+    load_config >> data_ingestion >> data_split >> data_validation >> track_data  >> data_transformation >> hyperparameter_optimization >> model_training >> model_validation >> [
         push_to_production, stop]
 
     data_split >> data_validation >> data_transformation >> model_validation >> [

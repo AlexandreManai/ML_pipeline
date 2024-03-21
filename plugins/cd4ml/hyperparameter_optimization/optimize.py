@@ -7,6 +7,10 @@ logger = logging.getLogger(__name__)
 
 def run_trial(data_files, **kwargs):
 
+    # Get configuration from config file or optuna optimization
+    task_instance = kwargs.get('task_instance')
+    conf = task_instance.xcom_pull(task_ids='load_config')['hyperparameter_optimization']["parameters"]
+
     def objective(trial):
 
         # Get training data
@@ -16,10 +20,6 @@ def run_trial(data_files, **kwargs):
         # Get test data
         x_test = pd.read_csv(data_files['transformed_x_test_file'])
         y_test = pd.read_csv(data_files['transformed_y_test_file'])
-
-        # Get configuration from config file or optuna optimization
-        task_instance = kwargs.get('task_instance')
-        conf = task_instance.xcom_pull(task_ids='load_config')['hyperparameter_optimization']
 
         trial_params = {}
         for hp_name, hp_details in conf.items():
