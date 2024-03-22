@@ -67,8 +67,8 @@ Here are the links to access various components of the pipeline:
 To stop and clean up resources, run the following commands:
 
 ```bash
-docker-compose stop  # Stops containers
-docker-compose down  # Removes containers, networks, volumes, and images created by 'up'
+docker compose stop  # Stops containers written in docker compose v2
+docker compose down  # Removes containers, networks, volumes, and images created by 'up' written in docker compose v2
 docker rm $(docker ps -aq) # Removes all containers
 docker rmi $(docker images -q) # Removes all images
 docker volume prune  # Removes all unused volumes
