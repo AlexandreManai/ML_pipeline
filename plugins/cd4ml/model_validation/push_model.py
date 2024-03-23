@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def push_model(model="LR", **kwargs):
+def push_model(**kwargs):
     """
     Push the model to the mlflow server and labels it as production. Tags all other models
     currently in production as archived.
@@ -19,6 +19,10 @@ def push_model(model="LR", **kwargs):
     """
 
     task_instance = kwargs.get('task_instance')
+
+    # Pull xcom from configuration
+    conf_general_config = task_instance.xcom_pull(task_ids='load_config')["general_config"]
+    model = conf_general_config["model_name"]
 
     if task_instance is None:
         raise ValueError(

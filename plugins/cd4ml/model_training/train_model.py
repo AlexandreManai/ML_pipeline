@@ -27,7 +27,7 @@ def get_model(conf):
     return model
     
 
-def train_model(data_files, home_dir, experiment_name="experiment", **kwargs):
+def train_model(data_files, home_dir, **kwargs):
     """
     Loads x_train.csv and y_train.csv from data_dir, trains a model and tracks
     it with MLflow
@@ -44,54 +44,51 @@ def train_model(data_files, home_dir, experiment_name="experiment", **kwargs):
     ]
     _check_keys(data_files, required_keys)
 
+    # Get experiment name from XCom
+
+
     # Get configuration from config file or optuna optimization
     task_instance = kwargs.get('task_instance')
-    conf = task_instance.xcom_pull(task_ids='load_config')['model_training']
+    conf = task_instance.xcom_pull(task_ids='load_config')
+    conf_train = conf["model_training"]
 
-    # logger.info(f"Configuration: {conf}")
+    # Pull xcom from configuration
+    conf_general_config = task_instance.xcom_pull(task_ids='load_config')['general_config']
 
-    if conf["optuna"]:
-        conf = task_instance.xcom_pull(task_ids='hyperparameter_optimization')
+    if conf_train["optuna"]:
+        conf_train = task_instance.xcom_pull(task_ids='hyperparameter_optimization')
 
     logger.info(f"Configuration: {conf}")
     
     start = time.time()
         
-    mlflow.set_experiment(experiment_name)
+    mlflow.set_experiment(conf_general_config["mlflow_experiment_name"])
     mlflow.autolog()
     
     x_train = pd.read_csv(data_files['transformed_x_train_file'])
     y_train = pd.read_csv(data_files['transformed_y_train_file'])
 
-    os.chdir(home_dir)
+    # os.chdir(home_dir)
     
     with mlflow.start_run() as active_run:
         run_id = active_run.info.run_id
-        # add the git commit hash as tag to the experiment run
-        # git_hash = os.popen("git rev-parse --verify HEAD").read()[:-2]
 
-        logger.info(f"home_dir: {os.listdir()}")
-
-        # TODO: Issue on these commands
-        # with sp.Popen(["git", "status"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
-        #     logger.info(f"error: {proc.stderr.read()}")
-        #     logger.info(f"git status: {proc.stdout.read()}")
-        
-        with sp.Popen(["git", "rev-parse", "--verify", "HEAD"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=home_dir) as proc:
+        # add the git commit hash as tag to the experiment run    
+        with sp.Popen(["git", "rev-parse", "--verify", "HEAD"], stdout=sp.PIPE, stderr=sp.PIPE) as proc:
             git_hash = proc.stdout.read().decode("utf-8")[:-1]
             logger.info(f"error: {proc.stderr.read()}")
 
-        os.popen(f"git -C {home_dir} status").read()
-        git_hash = os.popen(f"git -C {home_dir} rev-parse --verify HEAD").read()[:-1]
-
-        logger.info(f"git hash: {git_hash}")
+        # logger.info(f"git hash: {git_hash}")
         mlflow.set_tag("git_hash", git_hash)
         
-        clf = get_model(conf)
+        clf = get_model(conf_train)
         clf.fit(x_train, y_train)
     
         # return the model uri
         model_uri = mlflow.get_artifact_uri("model")
+
+        # Log the configuration parameters
+        mlflow.log_params(conf)
        
     logger.info(f"completed script in {round(time.time() - start, 3)} seconds)") 
     

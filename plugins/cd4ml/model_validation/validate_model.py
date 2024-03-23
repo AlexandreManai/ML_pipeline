@@ -13,8 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-_eta = 0.01
-_min_f1_score = 0.4
+
 
 
 def _get_performance(y, y_pred, model_name, average='macro'):
@@ -40,7 +39,7 @@ def _check_keys(dict_, required_keys):
             raise ValueError(f'input argument "data_files" is missing required key "{key}"')
         
         
-def validate_model(data_files, model="LR", **kwargs):
+def validate_model(data_files, **kwargs):
     """
     Validate the model by comparing with the performance of the current production model.
     If performance (F1-score) of the new model exceeds a minimum threshold and the 
@@ -59,6 +58,17 @@ def validate_model(data_files, model="LR", **kwargs):
     _check_keys(data_files, required_keys)
     
     task_instance = kwargs.get('task_instance')
+
+    conf = task_instance.xcom_pull(task_ids='load_config')
+    
+    # Pull xcom from configuration
+    conf_general_config = conf['general_config']
+    model = conf_general_config['model_name']
+
+    # Pull xcom from configuratio
+    conf_model_validation = conf['model_validation']
+    _min_f1_score = conf_model_validation['min_f1_score']
+    _eta = conf_model_validation['eta']
 
     if task_instance is None:
         ValueError(

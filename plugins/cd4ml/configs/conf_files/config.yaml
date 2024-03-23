@@ -1,3 +1,9 @@
+general_config:
+  model_name: my_model
+  mlflow_experiment_name: my_experiment
+  git_email: alexandre@manai.fr
+  git_name: AlexandreManai
+  batch_name: batch2
 hyperparameter_optimization:
   direction: maximize
   n_trials: 100
@@ -12,3 +18,6 @@ model_training:
   optuna: true
   C: 1
   iterations: 100
+model_validation:
+  eta: 0.01
+  min_f1_score: 0.4

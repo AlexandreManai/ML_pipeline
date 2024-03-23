@@ -105,6 +105,9 @@ def ingest_data(input_folder, data_files, from_date=None, to_date=None):
     Returns:
         pd.DataFrame: aggregated data frame
     """
+
+    # logger.info(f"Current working directory: {os.getcwd()}")
+    # logger.info(f"List files {os.listdir()}")
     
     _check_keys(data_files, ["raw_data_file"])
     output_file = data_files['raw_data_file']

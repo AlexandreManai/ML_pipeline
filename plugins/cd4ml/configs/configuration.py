@@ -1,6 +1,7 @@
 import sys
 import logging
 import omegaconf
+import subprocess as sp
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,16 @@ def load_config(conf_path):
 
     # DictConfig to Dict
     conf = omegaconf.OmegaConf.to_container(conf, resolve=True)
+
+    # Set up git configuration Email
+    with sp.Popen(["git", "config", "--global", "user.email", conf["general_config"]["git_email"]], stdout=sp.PIPE, stderr=sp.PIPE) as proc:
+        print(proc.stdout.read())
+        print(proc.stderr.read())
+
+    # Set up git configuration Name
+    with sp.Popen(["git", "config", "--global", "user.name", conf["general_config"]["git_name"]], stdout=sp.PIPE, stderr=sp.PIPE) as proc:
+        print(proc.stdout.read())
+        print(proc.stderr.read())
 
     return conf
 

@@ -6,6 +6,7 @@
 # ================================================================================
 
 import os
+import subprocess as sp
 from datetime import timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
@@ -23,6 +24,8 @@ from cd4ml.data_processing.track_data import track_data
 from cd4ml.configs.configuration import load_config
 from cd4ml.hyperparameter_optimization.optimize import run_trial
 
+_root_dir = "/opt/airflow"
+
 # ---------------------------------------------------------------------------
 
 ### SET A UNIQUE MODEL NAME (e.g. "model_<YOUR NAME>"):
@@ -30,21 +33,25 @@ _model_name = "my_model"
 ### SET A UNIQUE EXPERIMENT NAME (e.g. "experiment_<YOUR NAME>"):
 _mlflow_experiment_name = "my_experiment"
 
+
 ### SET CONFIG FILE NAME
 _conf_file = "config"
 
 ### SET RAW DATA DIRECTORY
 # _raw_data_dir = '/data/batch1'
-_raw_data_dir = '/data/batch1'
+_raw_data_dir = os.path.join(_root_dir, 'data/batch2')
 
 # ---------------------------------------------------------------------------
 
+# Enable ownership of the root_dir
+with sp.Popen(["git", "config", "--global", "--add", "safe.directory", "/opt/airflow"], stdout=sp.PIPE, stderr=sp.PIPE) as proc:
+    print(proc.stdout.read())
+    print(proc.stderr.read())
 
-_root_dir = "/"
 _current_working_dir = os.getcwd()
 _plugin_dir = os.path.join(_current_working_dir, 'plugins', 'cd4ml')
 _conf_path = os.path.join(_plugin_dir, 'configs', 'conf_files', _conf_file + ".yaml")
-_data_dir = "/data"
+_data_dir = os.path.join(_root_dir, "data") 
 _data_files = {
     'raw_data_file': os.path.join(_data_dir, 'data.csv'),
     'raw_train_file': os.path.join(_data_dir, 'data_train.csv'),
@@ -57,7 +64,6 @@ _data_files = {
 
 if not _root_dir:
     raise ValueError('PROJECT_PATH environment variable not set')
-
 
 default_args = {
     'owner': 'cd4ml',
@@ -130,8 +136,7 @@ with dag:
         python_callable=train_model,
         op_kwargs={
             'data_files': _data_files,
-            'home_dir': _data_dir,
-            'experiment_name': _mlflow_experiment_name
+            'home_dir': _data_dir
         }
     )
 
@@ -139,8 +144,7 @@ with dag:
         task_id='model_validation',
         python_callable=validate_model,
         op_kwargs={
-            'data_files': _data_files,
-            'model': _model_name
+            'data_files': _data_files
         },
     )
 
@@ -153,9 +157,7 @@ with dag:
     push_to_production = PythonOperator(
         task_id='push_new_model',
         python_callable=push_model,
-        op_kwargs={
-            'model': _model_name
-        },
+        op_kwargs={},
     )
 
     load_config >> data_ingestion >> data_split >> data_validation >> track_data  >> data_transformation >> hyperparameter_optimization >> model_training >> model_validation >> [
