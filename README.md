@@ -49,7 +49,7 @@ pip install docker-compose
 ### 5. Launch the pipeline:
 
 ```bash
-docker-compose up 
+docker compose up 
 ```
 
 ## Access 🌐
