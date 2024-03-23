@@ -26,22 +26,8 @@ from cd4ml.hyperparameter_optimization.optimize import run_trial
 
 _root_dir = "/opt/airflow"
 
-# ---------------------------------------------------------------------------
-
-### SET A UNIQUE MODEL NAME (e.g. "model_<YOUR NAME>"):
-_model_name = "my_model"
-### SET A UNIQUE EXPERIMENT NAME (e.g. "experiment_<YOUR NAME>"):
-_mlflow_experiment_name = "my_experiment"
-
-
 ### SET CONFIG FILE NAME
 _conf_file = "config"
-
-### SET RAW DATA DIRECTORY
-# _raw_data_dir = '/data/batch1'
-_raw_data_dir = os.path.join(_root_dir, 'data/batch2')
-
-# ---------------------------------------------------------------------------
 
 # Enable ownership of the root_dir
 with sp.Popen(["git", "config", "--global", "--add", "safe.directory", "/opt/airflow"], stdout=sp.PIPE, stderr=sp.PIPE) as proc:
@@ -66,7 +52,7 @@ if not _root_dir:
     raise ValueError('PROJECT_PATH environment variable not set')
 
 default_args = {
-    'owner': 'cd4ml',
+    'owner': 'Alexandre Manai',
     'depends_on_past': False,
     'start_date': days_ago(0),
     'retries': 1,
@@ -74,7 +60,7 @@ default_args = {
 }
 
 dag = DAG(
-    'ci_pipeline',
+    'training_pipeline',
     default_args=default_args,
     description='Continuous Integration Pipeline',
     schedule_interval=timedelta(days=1),
