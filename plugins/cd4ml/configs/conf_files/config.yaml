@@ -3,7 +3,7 @@ general_config:
   mlflow_experiment_name: my_experiment
   git_email: alexandre@manai.fr
   git_name: AlexandreManai
-  batch_name: batch2
+  batch_name: batch0
 hyperparameter_optimization:
   direction: maximize
   n_trials: 100

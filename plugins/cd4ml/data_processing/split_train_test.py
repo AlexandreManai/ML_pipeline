@@ -26,7 +26,9 @@ def get_train_test_split(df, n_days_test):
         Tuple[pd.DataFrame]: raw train and test data splits
     """
 
-    df['date'] = df['measured_at'].apply(lambda x: x[:10])
+    logger.info(f"{df['measured_at'][0]}")
+
+    df['date'] = df['measured_at'].apply(lambda x: x[:10] if pd.notnull(x) else x)
 
     min_date_str = df['date'].min()
     max_date = datetime.strptime(df['date'].max(), '%Y-%m-%d')
@@ -70,6 +72,7 @@ def split_train_test(data_files, n_days_test=10, **kwargs):
     
     df = pd.read_csv(input_file)
     logger.info(f"loaded {input_file} successfully")
+    logger.info(f"Data head: {df.head()}")
 
     df_train, df_test = get_train_test_split(df, n_days_test)
     

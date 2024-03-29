@@ -4,3 +4,4 @@ dvc
 scikit-learn
 optuna
 omegaconf
+hydra-core

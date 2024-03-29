@@ -1,10 +1,3 @@
-# Author:      CD4ML Working Group @ D ONE
-# Description: Script that defines and creates the CI Airflow DAG (the MLOps 
-#              training pipeline). If the Airflow scheduler and webserver are
-#              running, you can visit the UI on localhost:8080 and trigger & 
-#              monitor the pipeline
-# ================================================================================
-
 import os
 import subprocess as sp
 from datetime import timedelta
@@ -67,9 +60,8 @@ dag = DAG(
 )
 
 with dag:
-    pass
 
-    load_config = PythonOperator(
+    load_config_ = PythonOperator(
         task_id='load_config',
         python_callable=load_config,
         op_kwargs={'conf_path': _conf_path}
@@ -78,7 +70,7 @@ with dag:
     data_ingestion = PythonOperator(
         task_id='data_ingestion',
         python_callable=ingest_data,
-        op_kwargs={'input_folder': _raw_data_dir,
+        op_kwargs={'input_folder': _data_dir,
                    'data_files': _data_files}
     )
     
@@ -96,7 +88,7 @@ with dag:
                    'configs_dir': _data_dir}
     )
 
-    track_data = PythonOperator(
+    track_data_ = PythonOperator(
         task_id='track_data',
         python_callable=track_data,
         op_kwargs={'home_dir': _data_dir,
@@ -146,7 +138,7 @@ with dag:
         op_kwargs={},
     )
 
-    load_config >> data_ingestion >> data_split >> data_validation >> track_data  >> data_transformation >> hyperparameter_optimization >> model_training >> model_validation >> [
+    load_config_ >> data_ingestion >> data_split >> data_validation >> track_data_  >> data_transformation >> hyperparameter_optimization >> model_training >> model_validation >> [
         push_to_production, stop]
 
     data_split >> data_validation >> data_transformation >> model_validation >> [

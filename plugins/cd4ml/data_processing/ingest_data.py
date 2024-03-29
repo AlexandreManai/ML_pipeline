@@ -89,7 +89,7 @@ def get_data(input_folder, from_date=None, to_date=None):
     return pd.concat(dfs)
     
     
-def ingest_data(input_folder, data_files, from_date=None, to_date=None):
+def ingest_data(input_folder, data_files, from_date=None, to_date=None, **kwargs):
     """
     Save the aggregated dataframe, consisting of all data inside 'input_folder'
     between 'from_date' and 'to_date', to the location specified in
@@ -106,8 +106,13 @@ def ingest_data(input_folder, data_files, from_date=None, to_date=None):
         pd.DataFrame: aggregated data frame
     """
 
-    # logger.info(f"Current working directory: {os.getcwd()}")
-    # logger.info(f"List files {os.listdir()}")
+    # Pull xcom from configuratio
+    task_instance = kwargs.get('task_instance')
+    conf_general_config = task_instance.xcom_pull(task_ids='load_config')['general_config']
+    batch_name = conf_general_config['batch_name']
+
+    # Add the batch name to the input folder
+    input_folder = os.path.join(input_folder, batch_name)
     
     _check_keys(data_files, ["raw_data_file"])
     output_file = data_files['raw_data_file']
