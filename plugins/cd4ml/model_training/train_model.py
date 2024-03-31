@@ -21,9 +21,9 @@ def get_model(conf):
     """define and return the multi-classication model"""
     # DEFINE YOUR IMPROVED MODEL HERE:
 
-    C = conf.get('C', 1.0)
-    iterations = conf.get('iterations', 1000)
-    model = LogisticRegression(C=C, max_iter=iterations)
+    # C = conf.get('C', 1.0)
+    # iterations = conf.get('iterations', 1000)
+    model = LogisticRegression(**conf)
     return model
     
 
@@ -57,8 +57,10 @@ def train_model(data_files, home_dir, **kwargs):
 
     if conf_train["optuna"]:
         conf_train = task_instance.xcom_pull(task_ids='hyperparameter_optimization')
+    else:
+        del conf_train["optuna"]
 
-    logger.info(f"Configuration: {conf}")
+    # logger.info(f"Configuration: {conf}")
     
     start = time.time()
         
